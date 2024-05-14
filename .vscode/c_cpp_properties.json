@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": ["${workspaceFolder}/**", "/Users/simonvaclavik/Documents/Arduino/libraries"],
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
