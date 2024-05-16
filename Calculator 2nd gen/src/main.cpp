@@ -1,18 +1,19 @@
 #include <Arduino.h>
+#include <pitches.h>
+#include <Keypad.h>
+#include <LiquidCrystal.h>
 
-// put function declarations here:
-int myFunction(int, int);
-
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+// run after start
+void setup() 
+{
+  // serial monitor setup
+  Serial.begin(9600);
+  Serial.println("Start");
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+// run forever until break
+void loop() 
+{
+  Serial.println("Loop started");
+  delay(1000);
 }
