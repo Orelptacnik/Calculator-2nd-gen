@@ -79,6 +79,7 @@ int duration[] =
 
 // var of buzzer sequence
 int seq = 0;
+bool allowSound;
 
 void setup() {
   Serial.begin(9600);
@@ -99,13 +100,19 @@ void setup() {
 
       if (mainKey == '1')
       {
+        allowSound = true;
         mathematic();
         break;
       }
       else if (mainKey == '2')
       {
+        allowSound = false;
+        mathematic();
+        break;
+        /* 
         equations();
         break;
+        */
       }
       else if (mainKey == '3')
       {
@@ -371,10 +378,14 @@ void credit(void)
 
 void play(void)
 {
-  tone(12, melody[seq], duration[seq]);
-  seq++;
-  if (seq > 51)
-  {     
-    seq = 0;
+  if (allowSound == true)
+  {
+    tone(12, melody[seq], duration[seq]);
+    seq++;
+    if (seq > 51)
+    {     
+      seq = 0;
+    }
   }
+  
 }
