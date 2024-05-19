@@ -34,9 +34,31 @@ char mainKeys[ROWS][COLS] =
   { '*', '0', '#', '=' }
 };
 
+char aditionMathKeys[ROWS][COLS] = 
+{
+  { '.', '-', '^', 'd' }, // decimal, negative, square x, delete
+  { '√', 'x√', 'p', 'c' }, // sqroot 2, sqroot x, pi, clear
+  { '%', 'x', 'x', 'a' }, // remain, nothing, nothing, ans
+  { 'm', 'x', '#', 'y' } // main menu, nothing, changeKey, approve - sqr(root)
+};
+
+char goniometricKeys[ROWS][COLS] = 
+{
+  { 's', 'S', 'x', 'u' }, // sinus, arcusSinus, nothing, change units
+  { 'c', 'C', 'x', 'd' }, // cosinus, arcusCosinus, nothing, degrees
+  { 't', 'T', 'x', 'c' }, // tangens, cotangens, nothing, clear
+  { 'd', 'a', '#', 'y' } // decimal, ans, changeKey, approve - goniometric
+};
+
 // create var for certain keypad - add other later if needed
 Keypad mainKeypad = Keypad(makeKeymap(mainKeys), rowPins, colPins, ROWS, COLS);
 char mainKey;
+
+Keypad aditionMathKeypad = Keypad(makeKeymap(aditionMathKeys), rowPins, colPins, ROWS, COLS);
+char aditionMathKey;
+
+Keypad goniometricKeypad = Keypad(makeKeymap(goniometricKeys), rowPins, colPins, ROWS, COLS);
+char goniometricKey;
 
 // buzzer melody and duration
 int melody[] = 
@@ -356,4 +378,3 @@ void play(void)
     seq = 0;
   }
 }
-
