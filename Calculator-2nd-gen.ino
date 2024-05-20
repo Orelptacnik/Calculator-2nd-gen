@@ -34,9 +34,32 @@ char mainKeys[ROWS][COLS] =
   { '*', '0', '#', '=' }
 };
 
+char aditionMathKeys[ROWS][COLS] = 
+{
+  { '.', '-', '^', 'd' }, // decimal, negative, square x, delete
+  { '√', 'x√', 'p', 'c' }, // sqroot 2, sqroot x, pi, clear
+  { '%', 'x', 'x', 'a' }, // remain, nothing, nothing, ans
+  { 'm', 'x', '#', 'y' } // main menu, nothing, changeKey, approve - sqr(root)
+};
+
+char goniometricKeys[ROWS][COLS] = 
+{
+  { 's', 'S', 'x', 'u' }, // sinus, arcusSinus, nothing, change units
+  { 'c', 'C', 'x', 'd' }, // cosinus, arcusCosinus, nothing, degrees
+  { 't', 'T', 'x', 'c' }, // tangens, cotangens, nothing, clear
+  { 'd', 'a', '#', 'y' } // delete, ans, changeKey, approve - goniometric
+};
+
 // create var for certain keypad - add other later if needed
 Keypad mainKeypad = Keypad(makeKeymap(mainKeys), rowPins, colPins, ROWS, COLS);
+
+Keypad aditionMathKeypad = Keypad(makeKeymap(aditionMathKeys), rowPins, colPins, ROWS, COLS);
+
+Keypad goniometricKeypad = Keypad(makeKeymap(goniometricKeys), rowPins, colPins, ROWS, COLS);
+
+// variables to store which keyboard use
 char mainKey;
+int keyboardType = 0;
 
 // buzzer melody and duration
 int melody[] = 
@@ -57,6 +80,7 @@ int duration[] =
 
 // var of buzzer sequence
 int seq = 0;
+bool allowSound;
 
 void setup() {
   Serial.begin(9600);
@@ -77,13 +101,19 @@ void setup() {
 
       if (mainKey == '1')
       {
+        allowSound = true;
         mathematic();
         break;
       }
       else if (mainKey == '2')
       {
+        allowSound = false;
+        mathematic();
+        break;
+        /* 
         equations();
         break;
+        */
       }
       else if (mainKey == '3')
       {
@@ -130,7 +160,26 @@ void mathematic(void)
   // check for keys being pressed
   while(true)
   {
-    mainKey = mainKeypad.getKey();
+    if (keyboardType == 0)
+    {
+      mainKey = mainKeypad.getKey();
+    }
+    else if (keyboardType == 1)
+    {
+      mainKey = aditionMathKeypad.getKey();
+    }
+    else if (keyboardType == 2)
+    {
+      mainKey = goniometricKeypad.getKey();
+    }
+    else
+    {
+      lcd.setCursor(0, 0);
+      lcd.print("Error 3         ");
+      lcd.setCursor(0, 1);
+      lcd.print("Undefined Keypad");
+      break;
+    }
 
     if (mainKey)
     {
@@ -297,14 +346,34 @@ void mathematic(void)
       if (mainKey == '#')
       {
         lcd.setCursor(0, 0);
-        lcd.print("                ");
+        lcd.print("Choose mod 0-3  ");
         lcd.setCursor(0, 1);
         lcd.print("                ");
         lcd.setCursor(0, 0);
-        num = 0;
-        num1 = 0;
-        num2 = 0;
-        eCount = 0;
+
+        while(true)
+        {
+          mainKey = mainKeypad.getKey();
+          if (mainKey)
+          {
+            if (mainKey == '0')
+            {
+              keyboardType = 0;
+              break;
+            }
+            else if (mainKey == '1')
+            {
+              keyboardType = 1;
+              break;
+            }
+            else if (mainKey == '2')
+            {
+              keyboardType = 2;
+              break;
+            }
+          }
+        }
+        Serial.print(keyboardType);
       }
 
       if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
@@ -349,11 +418,14 @@ void credit(void)
 
 void play(void)
 {
-  tone(12, melody[seq], duration[seq]);
-  seq++;
-  if (seq > 51)
-  {     
-    seq = 0;
+  if (allowSound == true)
+  {
+    tone(12, melody[seq], duration[seq]);
+    seq++;
+    if (seq > 51)
+    {     
+      seq = 0;
+    }
   }
+  
 }
-
