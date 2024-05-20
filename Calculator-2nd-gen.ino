@@ -47,18 +47,19 @@ char goniometricKeys[ROWS][COLS] =
   { 's', 'S', 'x', 'u' }, // sinus, arcusSinus, nothing, change units
   { 'c', 'C', 'x', 'd' }, // cosinus, arcusCosinus, nothing, degrees
   { 't', 'T', 'x', 'c' }, // tangens, cotangens, nothing, clear
-  { 'd', 'a', '#', 'y' } // decimal, ans, changeKey, approve - goniometric
+  { 'd', 'a', '#', 'y' } // delete, ans, changeKey, approve - goniometric
 };
 
 // create var for certain keypad - add other later if needed
 Keypad mainKeypad = Keypad(makeKeymap(mainKeys), rowPins, colPins, ROWS, COLS);
-char mainKey;
 
 Keypad aditionMathKeypad = Keypad(makeKeymap(aditionMathKeys), rowPins, colPins, ROWS, COLS);
-char aditionMathKey;
 
 Keypad goniometricKeypad = Keypad(makeKeymap(goniometricKeys), rowPins, colPins, ROWS, COLS);
-char goniometricKey;
+
+// variables to store which keyboard use
+char mainKey;
+int keyboardType = 0;
 
 // buzzer melody and duration
 int melody[] = 
@@ -159,7 +160,26 @@ void mathematic(void)
   // check for keys being pressed
   while(true)
   {
-    mainKey = mainKeypad.getKey();
+    if (keyboardType == 0)
+    {
+      mainKey = mainKeypad.getKey();
+    }
+    else if (keyboardType == 1)
+    {
+      mainKey = aditionMathKeypad.getKey();
+    }
+    else if (keyboardType == 2)
+    {
+      mainKey = goniometricKeypad.getKey();
+    }
+    else
+    {
+      lcd.setCursor(0, 0);
+      lcd.print("Error 3         ");
+      lcd.setCursor(0, 1);
+      lcd.print("Undefined Keypad");
+      break;
+    }
 
     if (mainKey)
     {
@@ -326,14 +346,34 @@ void mathematic(void)
       if (mainKey == '#')
       {
         lcd.setCursor(0, 0);
-        lcd.print("                ");
+        lcd.print("Choose mod 0-3  ");
         lcd.setCursor(0, 1);
         lcd.print("                ");
         lcd.setCursor(0, 0);
-        num = 0;
-        num1 = 0;
-        num2 = 0;
-        eCount = 0;
+
+        while(true)
+        {
+          mainKey = mainKeypad.getKey();
+          if (mainKey)
+          {
+            if (mainKey == '0')
+            {
+              keyboardType = 0;
+              break;
+            }
+            else if (mainKey == '1')
+            {
+              keyboardType = 1;
+              break;
+            }
+            else if (mainKey == '2')
+            {
+              keyboardType = 2;
+              break;
+            }
+          }
+        }
+        Serial.print(keyboardType);
       }
 
       if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
