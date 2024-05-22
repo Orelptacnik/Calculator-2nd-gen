@@ -11,6 +11,7 @@ void flyGame(void);
 void myTime(void);
 void credit(void);
 void play(void);
+void clearLcd(void);
 
 // initialize lcd
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -90,7 +91,7 @@ int startupDuration[] =
 
 // var of buzzer sequence
 int seq = 0;
-bool allowSound;
+bool allowSound = true;
 
 void setup() {
   Serial.begin(9600);
@@ -104,6 +105,11 @@ void setup() {
     tone(12, startup[i], startupDuration[i]);
     delay(startupDuration[i] + 10);
   }
+
+  lcd.setCursor(0, 0);
+  lcd.print("Choose mod 1-5");
+  lcd.setCursor(0, 1);
+  lcd.print("Credits -> D");
   
   // choose mod
   while(true)
@@ -117,19 +123,13 @@ void setup() {
 
       if (mainKey == '1')
       {
-        allowSound = true;
         mathematic();
         break;
       }
       else if (mainKey == '2')
       {
-        allowSound = false;
-        mathematic();
-        break;
-        /* 
         equations();
         break;
-        */
       }
       else if (mainKey == '3')
       {
@@ -151,7 +151,7 @@ void setup() {
         myTime();
         break;
       }
-      else if (mainKey == '/')
+      else if (mainKey == '=')
       {
         credit();
       }
@@ -172,6 +172,12 @@ void mathematic(void)
   float num2 = 0;
   char op;
   int eCount = 0;
+  char firstRow[] = "                ";
+  char secondRow[] = "                ";
+  int fPos = 0;
+  int sPos = 0;
+
+  clearLcd();
 
   // check for keys being pressed
   while(true)
@@ -202,6 +208,27 @@ void mathematic(void)
       lcd.print(mainKey);
       play();
       
+      if (eCount % 2 == 0)
+      {
+        firstRow[fPos] = mainKey;
+        fPos++;
+        secondRow[0] = "                ";
+        sPos = 0;
+
+        Serial.print("First: ");
+        Serial.println(firstRow);
+      }
+      else
+      {
+        secondRow[sPos] = mainKey;
+        sPos++;
+        firstRow[0] = "                ";
+        fPos = 0;
+
+        Serial.print("Second: ");
+        Serial.println(secondRow);
+      }
+
       // when 1 was pressed
       if (mainKey == '1') 
       { 
@@ -361,11 +388,10 @@ void mathematic(void)
 
       if (mainKey == '#')
       {
-        lcd.setCursor(0, 0);
-        lcd.print("Choose mod 0-3  ");
+        clearLcd();
+        lcd.print("Choose mod 0-3");
         lcd.setCursor(0, 1);
-        lcd.print("                ");
-        lcd.setCursor(0, 0);
+        lcd.print("A -> DEL, B -> C");
 
         while(true)
         {
@@ -375,16 +401,31 @@ void mathematic(void)
             if (mainKey == '0')
             {
               keyboardType = 0;
+              clearLcd();
               break;
             }
             else if (mainKey == '1')
             {
               keyboardType = 1;
+              clearLcd();
               break;
             }
             else if (mainKey == '2')
             {
               keyboardType = 2;
+              clearLcd();
+              break;
+            }
+            else if (mainKey == '+')
+            {
+              // make function that deletes last character
+              clearLcd();
+              break;
+            }
+            else if (mainKey == '-')
+            {
+              // completely clear all values and lcd
+              clearLcd();
               break;
             }
           }
@@ -444,4 +485,13 @@ void play(void)
     }
   }
   
+}
+
+void clearLcd(void)
+{
+  lcd.setCursor(0, 0);
+  lcd.print("                ");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+  lcd.setCursor(0, 0);
 }
