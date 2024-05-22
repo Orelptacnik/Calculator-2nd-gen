@@ -69,13 +69,23 @@ int melody[] =
   NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_A4, NOTE_G4, NOTE_AS4, NOTE_G4, NOTE_A4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_G4, NOTE_AS4
 };
 
-int duration[] =
+int durationMelody[] =
 {
   500, 500, 150, 150, 600, 600, 600, 600, 1100,
   500, 500, 150, 150, 600, 600, 600, 600, 1100,
   500, 500, 150, 150, 600, 600, 600, 600, 1100,
   500, 500, 150, 150, 600, 600, 600, 600, 1100,
   360, 360, 150, 150, 150, 150, 150, 150, 150, 150, 150, 360, 360, 150, 150, 1100
+};
+
+int startup[] = 
+{
+  NOTE_DS5, NOTE_DS4, NOTE_AS4, NOTE_GS4, NOTE_DS5, NOTE_DS5, NOTE_AS4
+};
+
+int startupDuration[] = 
+{
+  300, 150, 350, 200, 250, 250, 250
 };
 
 // var of buzzer sequence
@@ -88,6 +98,12 @@ void setup() {
   // prepare lcd
   lcd.begin(16, 2);
   lcd.backlight();
+
+  for (int i = 0; i < 7; i++)
+  {
+    tone(12, startup[i], startupDuration[i]);
+    delay(startupDuration[i] + 10);
+  }
   
   // choose mod
   while(true)
@@ -420,7 +436,7 @@ void play(void)
 {
   if (allowSound == true)
   {
-    tone(12, melody[seq], duration[seq]);
+    tone(12, melody[seq], durationMelody[seq]);
     seq++;
     if (seq > 51)
     {     
