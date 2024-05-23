@@ -1,6 +1,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
 #include <pitches.h>
+#include <string.h>
 
 // functions
 void mathematic(void);
@@ -176,6 +177,11 @@ void mathematic(void)
   char secondRow[] = "                ";
   int fPos = 0;
   int sPos = 0;
+  int xCursor = 0;
+  int yCursor = 0;
+  int numberLength;
+  char lcdNumber[16];
+
 
   clearLcd();
 
@@ -205,26 +211,37 @@ void mathematic(void)
 
     if (mainKey)
     {
-      lcd.print(mainKey);
+      if (mainKey == '√')
+      {
+        lcd.print("\xE8");
+        xCursor++;
+      }
+      else if (mainKey != '#')
+      {
+        lcd.print(mainKey);
+        xCursor++;
+      }
       play();
       
       if (eCount % 2 == 0)
       {
-        firstRow[fPos] = mainKey;
-        fPos++;
-        secondRow[0] = "                ";
-        sPos = 0;
-
+        if (mainKey != '#')
+        {
+          firstRow[fPos] = mainKey;
+          fPos++;
+        }
+        
         Serial.print("First: ");
         Serial.println(firstRow);
       }
       else
       {
-        secondRow[sPos] = mainKey;
-        sPos++;
-        firstRow[0] = "                ";
-        fPos = 0;
-
+        if (mainKey != '#')
+        {
+          secondRow[sPos] = mainKey;
+          sPos++;
+        }
+        
         Serial.print("Second: ");
         Serial.println(secondRow);
       }
@@ -354,36 +371,57 @@ void mathematic(void)
           num = num1 + num2;
         }
         else if (op == '-')
-       {          
-         num2 = num;
-         num = num1 - num2;
-       }
-       else if (op == '/')
-       {          
-         num2 = num;
-         num = num1 / num2;
-       }
-       else if (op == '*')
-       {          
-         num2 = num;
-         num = num1 * num2;
-       }
+        {          
+          num2 = num;
+          num = num1 - num2;
+        }
+        else if (op == '/')
+        {          
+          num2 = num;
+          num = num1 / num2;
+        }
+        else if (op == '*')
+        {          
+          num2 = num;
+          num = num1 * num2;
+        }
 
-       if (eCount % 2 == 0)
-       {
-        lcd.setCursor(0, 1);
-        lcd.print("                ");
-        lcd.setCursor(0, 1);
-        lcd.print(num);
-       }
-       else
-       {
-        lcd.setCursor(0, 0);
-        lcd.print("                ");
-        lcd.setCursor(0, 0);
-        lcd.print(num);
-       }
+        sprintf(lcdNumber, "%.2f", num);
+        numberLength = strlen(lcdNumber);
+
+        Serial.println(numberLength);
+        Serial.println(lcdNumber);
+
+        if (eCount % 2 == 0)
+        {
+          lcd.setCursor(0, 1);
+          lcd.print("                ");
+          lcd.setCursor(0, 1);
+          lcd.print(num);
+          yCursor = 1;
+
+          for (int i = 0; i < sPos; i++)
+          {
+            secondRow[i] = ' ';
+          }
+          sPos = 0;
+        }
+        else
+        {
+          lcd.setCursor(0, 0);
+          lcd.print("                ");
+          lcd.setCursor(0, 0);
+          lcd.print(num);
+          yCursor = 0;
+
+          for (int i = 0; i < fPos; i++)
+          {
+            firstRow[i] = ' ';
+          }
+          fPos = 0;
+        }
        eCount++;
+       xCursor = 0;
       }
 
       if (mainKey == '#')
@@ -401,33 +439,30 @@ void mathematic(void)
             if (mainKey == '0')
             {
               keyboardType = 0;
-              clearLcd();
-              break;
             }
             else if (mainKey == '1')
             {
               keyboardType = 1;
-              clearLcd();
-              break;
+
             }
             else if (mainKey == '2')
             {
               keyboardType = 2;
-              clearLcd();
-              break;
             }
             else if (mainKey == '+')
             {
               // make function that deletes last character
-              clearLcd();
-              break;
             }
             else if (mainKey == '-')
             {
               // completely clear all values and lcd
-              clearLcd();
-              break;
             }
+            clearLcd();
+            lcd.print(firstRow);
+            lcd.setCursor(0, 1);
+            lcd.print(secondRow);
+            lcd.setCursor(xCursor, yCursor);
+            break;
           }
         }
         Serial.print(keyboardType);
