@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.1.0
+v 0.1.1
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -488,12 +488,25 @@ void mathematic(void)
               keyboardType = 4; // wrong input
             }
 
-            // restore values to lcd - needs to include number - bug
-            clearLcd();
-            lcd.print(firstRow);
-            lcd.setCursor(0, 1);
-            lcd.print(secondRow);
-            break;
+            // restore values to lcd - bad cursor position - bug
+            if (eCount % 2 == 0)
+            {
+              clearLcd();
+              lcd.print(num);
+              lcd.print(firstRow);
+              lcd.setCursor(0, 1);
+              lcd.print(secondRow);
+              break;
+            }
+            else
+            {
+              clearLcd();
+              lcd.print(firstRow);
+              lcd.setCursor(0, 1);
+              lcd.print(num);
+              lcd.print(secondRow);
+              break;
+            }
           }
         }
         Serial.print(keyboardType);
