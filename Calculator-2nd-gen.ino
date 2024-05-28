@@ -1,3 +1,20 @@
+/*
+Calculator 2nd gen
+v 0.1.0
+------------------
+Advanced arduino calculator
+Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
+All files on GitHub Orelptacnik/Calculator-2nd-gen
+--------------------------------------------------
+Created 14. 5. 2024
+GitHub: Orelptacnik
+-------------------
+Delete serial prints after tests
+Square root bug
+In the end optimize and delete duplicates of code
+Edit restoring values to lcd
+*/
+
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
 #include <pitches.h>
@@ -27,7 +44,6 @@ byte rowPins[ROWS] = { 2, 3, 4, 5 };
 byte colPins[COLS] = { A4, A3, A2, A1 };
 
 // create map for certain keypad - add other later if needed
-
 char mainKeys[ROWS][COLS] = 
 {
   { '1', '2', '3', '+' },
@@ -94,6 +110,7 @@ int startupDuration[] =
 int seq = 0;
 bool allowSound = true;
 
+// run when booted
 void setup() {
   Serial.begin(9600);
 
@@ -101,12 +118,14 @@ void setup() {
   lcd.begin(16, 2);
   lcd.backlight();
 
+  // play startup song
   for (int i = 0; i < 7; i++)
   {
     tone(12, startup[i], startupDuration[i]);
     delay(startupDuration[i] + 10);
   }
 
+  // print menu select
   lcd.setCursor(0, 0);
   lcd.print("Choose mod 1-5");
   lcd.setCursor(0, 1);
@@ -122,6 +141,7 @@ void setup() {
     {
       Serial.println("pressed");
 
+      // start proper function
       if (mainKey == '1')
       {
         mathematic();
@@ -160,34 +180,35 @@ void setup() {
   }
 }
 
+// unused loop - maybe something will be here later
 void loop() {
   // this doesn't stop
   Serial.println("loop");
   delay(1000);
 }
 
+// main mathematic calculator - operations, functions
 void mathematic(void)
 {
+  // storing calculators values
   float num = 0;
   float num1 = 0;
   float num2 = 0;
+  // storing operator
   char op;
+  // managing print section variables
   int eCount = 0;
   char firstRow[] = "                ";
   char secondRow[] = "                ";
   int fPos = 0;
   int sPos = 0;
-  int xCursor = 0;
-  int yCursor = 0;
-  int numberLength;
-  char lcdNumber[16];
-
 
   clearLcd();
 
   // check for keys being pressed
   while(true)
   {
+    // defines which map to use
     if (keyboardType == 0)
     {
       mainKey = mainKeypad.getKey();
@@ -206,23 +227,26 @@ void mathematic(void)
       lcd.print("Error 3         ");
       lcd.setCursor(0, 1);
       lcd.print("Undefined Keypad");
-      break;
     }
 
+    // when key is pressed
     if (mainKey)
     {
+      // non-functional condition - sqrroot is invalid char - try to fix it
       if (mainKey == '√')
       {
         lcd.print("\xE8");
-        xCursor++;
       }
+      // print every key except #
       else if (mainKey != '#')
       {
         lcd.print(mainKey);
-        xCursor++;
       }
+
+      // play music function
       play();
       
+      // store operations on each row
       if (eCount % 2 == 0)
       {
         if (mainKey != '#')
@@ -362,9 +386,10 @@ void mathematic(void)
         }
       }
 
+      // when = was pressed
       if (mainKey == '=')
       {
-
+        // choose operation
         if (op == '+')
         {          
           num2 = num;
@@ -386,20 +411,16 @@ void mathematic(void)
           num = num1 * num2;
         }
 
-        sprintf(lcdNumber, "%.2f", num);
-        numberLength = strlen(lcdNumber);
-
-        Serial.println(numberLength);
-        Serial.println(lcdNumber);
-
+        // choose row to print
         if (eCount % 2 == 0)
         {
+          // clear lcd
           lcd.setCursor(0, 1);
           lcd.print("                ");
           lcd.setCursor(0, 1);
           lcd.print(num);
-          yCursor = 1;
 
+          // clear stored row
           for (int i = 0; i < sPos; i++)
           {
             secondRow[i] = ' ';
@@ -408,29 +429,34 @@ void mathematic(void)
         }
         else
         {
+          // clear lcd
           lcd.setCursor(0, 0);
           lcd.print("                ");
           lcd.setCursor(0, 0);
           lcd.print(num);
-          yCursor = 0;
 
+          // clear stored row
           for (int i = 0; i < fPos; i++)
           {
             firstRow[i] = ' ';
           }
           fPos = 0;
         }
-       eCount++;
-       xCursor = 0;
+
+        // increase number that decides row where to print
+        eCount++;
       }
 
+      // when # was pressed
       if (mainKey == '#')
       {
+        // print menu
         clearLcd();
         lcd.print("Choose mod 0-3");
         lcd.setCursor(0, 1);
         lcd.print("A -> DEL, B -> C");
 
+        // loop that runs until keyboard map is choosed - created paper that you can glue to the calculator that shows mapping
         while(true)
         {
           mainKey = mainKeypad.getKey();
@@ -438,16 +464,16 @@ void mathematic(void)
           {
             if (mainKey == '0')
             {
-              keyboardType = 0;
+              keyboardType = 0; // main
             }
             else if (mainKey == '1')
             {
-              keyboardType = 1;
+              keyboardType = 1; // aditionMath
 
             }
             else if (mainKey == '2')
             {
-              keyboardType = 2;
+              keyboardType = 2; // goniometricKeys
             }
             else if (mainKey == '+')
             {
@@ -457,17 +483,23 @@ void mathematic(void)
             {
               // completely clear all values and lcd
             }
+            else
+            {
+              keyboardType = 4; // wrong input
+            }
+
+            // restore values to lcd - needs to include number - bug
             clearLcd();
             lcd.print(firstRow);
             lcd.setCursor(0, 1);
             lcd.print(secondRow);
-            lcd.setCursor(xCursor, yCursor);
             break;
           }
         }
         Serial.print(keyboardType);
       }
 
+      // when some op is pressed
       if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
       {
         op = mainKey;
@@ -480,34 +512,35 @@ void mathematic(void)
 
 void equations(void)
 {
-
+  // make equations function
 }
 
 void aritAverage(void)
 {
-
+  // make arithmetic function
 }
 
 void average(void)
 {
-
+  // make weighted average function
 }
 
 void flyGame(void)
 {
-
+  // make a game - you have to dodge obstacles by moving up and down
 }
 
 void myTime(void)
 {
-
+  // display time?
 }
 
 void credit(void)
 {
-
+  // print credits
 }
 
+// melody playing function
 void play(void)
 {
   if (allowSound == true)
@@ -519,9 +552,9 @@ void play(void)
       seq = 0;
     }
   }
-  
 }
 
+// clear lcd function
 void clearLcd(void)
 {
   lcd.setCursor(0, 0);
