@@ -12,7 +12,8 @@ GitHub: Orelptacnik
 Delete serial prints after tests
 Square root bug
 In the end optimize and delete duplicates of code
-Edit restoring values to lcd - should work if cursor position is monitored and used after restoring row
+Edit restoring values to lcd - should work if cursor position is monitored and used after restoring row -> EDIT: bug happens because
+of string that is like "1+1            " - you are typing outside of lcd - edit string so it prints only characters and tńot blank space
 */
 
 #include <LiquidCrystal_I2C.h>
@@ -31,6 +32,7 @@ void credit(void);
 void play(void);
 void clearLcd(void);
 bool decimal(float num);
+int lengthNum(float printFloat);
 
 // initialize lcd
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -206,6 +208,9 @@ void mathematic(void)
   bool numberType;
   int printInt;
   float printFloat;
+  int xPos = 0;
+  int yPos = 0;
+  int length;
 
   clearLcd();
 
@@ -240,11 +245,13 @@ void mathematic(void)
       if (mainKey == '√')
       {
         lcd.print("\xE8");
+        xPos++;
       }
       // print every key except #
       else if (mainKey != '#')
       {
         lcd.print(mainKey);
+        xPos++;
       }
 
       // play music function
@@ -417,15 +424,6 @@ void mathematic(void)
 
         numberType = decimal(num);
 
-        if (numberType == false)
-        {
-          printFloat = num;
-        }
-        else
-        {
-          printInt = num;
-        }
-
         // choose row to print
         if (eCount % 2 == 0)
         {
@@ -450,6 +448,7 @@ void mathematic(void)
             secondRow[i] = ' ';
           }
           sPos = 0;
+          yPos = 1;
         }
         else
         {
@@ -474,10 +473,12 @@ void mathematic(void)
             firstRow[i] = ' ';
           }
           fPos = 0;
+          yPos = 0;
         }
 
-        // increase number that decides row where to print
+        // increase number that decides row where to print and change cursor position
         eCount++;
+        xPos = 0;
       }
 
       // when # was pressed
@@ -524,28 +525,26 @@ void mathematic(void)
             // restore values to lcd - bad cursor position - bug
             numberType = decimal(num);
 
-            if (numberType == false)
-            {
-              printFloat = num;
-            }
-            else
-            {
-              printInt = num;
-            }
+            // get length of number
+            printInt = num;
+            length = lengthNum(printInt);
 
             if (eCount % 2 == 0)
             {
               clearLcd();
               if (numberType == false)
-              {
+              {        
                 printFloat = num;
                 lcd.print(printFloat);
+                xPos = xPos + 2 + length;
               }
               else
               {
                 printInt = num;
                 lcd.print(printInt);
+                xPos += length;
               }
+              lcd.setCursor(xPos, 0);
               lcd.print(firstRow);
               lcd.setCursor(0, 1);
               lcd.print(secondRow);
@@ -557,21 +556,25 @@ void mathematic(void)
               lcd.print(firstRow);
               lcd.setCursor(0, 1);
               if (numberType == false)
-              {
+              {        
                 printFloat = num;
                 lcd.print(printFloat);
+                xPos = xPos + 2 + length;
               }
               else
               {
                 printInt = num;
                 lcd.print(printInt);
+                xPos += length;
               }
+              lcd.setCursor(xPos, 1);
               lcd.print(secondRow);
               break;
             }
           }
         }
-        Serial.print(keyboardType);
+        Serial.println(keyboardType);
+        Serial.println(xPos);
       }
 
       // when some op is pressed
@@ -645,6 +648,20 @@ bool decimal(float num)
   {
     return true;
   }
+}
+
+// length of number function float/integer
+int lengthNum(int numberInt)
+{
+  int length = 0;
+
+  while (numberInt > 0)
+  {
+    numberInt /= 10;
+    length++;
+  }
+
+  return length;
 }
 
 // clear lcd function
