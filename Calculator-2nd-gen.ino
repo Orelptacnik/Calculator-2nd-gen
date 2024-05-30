@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.1.1
+v 0.1.2
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -12,7 +12,7 @@ GitHub: Orelptacnik
 Delete serial prints after tests
 Square root bug
 In the end optimize and delete duplicates of code
-Edit restoring values to lcd
+Edit restoring values to lcd - should work if cursor position is monitored and used after restoring row
 */
 
 #include <LiquidCrystal_I2C.h>
@@ -30,6 +30,7 @@ void myTime(void);
 void credit(void);
 void play(void);
 void clearLcd(void);
+bool decimal(float num);
 
 // initialize lcd
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -202,6 +203,9 @@ void mathematic(void)
   char secondRow[] = "                ";
   int fPos = 0;
   int sPos = 0;
+  bool numberType;
+  int printInt;
+  float printFloat;
 
   clearLcd();
 
@@ -411,6 +415,17 @@ void mathematic(void)
           num = num1 * num2;
         }
 
+        numberType = decimal(num);
+
+        if (numberType == false)
+        {
+          printFloat = num;
+        }
+        else
+        {
+          printInt = num;
+        }
+
         // choose row to print
         if (eCount % 2 == 0)
         {
@@ -418,8 +433,17 @@ void mathematic(void)
           lcd.setCursor(0, 1);
           lcd.print("                ");
           lcd.setCursor(0, 1);
-          lcd.print(num);
-
+          if (numberType == false)
+          {
+            printFloat = num;
+            lcd.print(printFloat);
+          }
+          else
+          {
+            printInt = num;
+            lcd.print(printInt);
+          }
+          
           // clear stored row
           for (int i = 0; i < sPos; i++)
           {
@@ -433,7 +457,16 @@ void mathematic(void)
           lcd.setCursor(0, 0);
           lcd.print("                ");
           lcd.setCursor(0, 0);
-          lcd.print(num);
+          if (numberType == false)
+          {
+            printFloat = num;
+            lcd.print(printFloat);
+          }
+          else
+          {
+            printInt = num;
+            lcd.print(printInt);
+          }
 
           // clear stored row
           for (int i = 0; i < fPos; i++)
@@ -489,10 +522,30 @@ void mathematic(void)
             }
 
             // restore values to lcd - bad cursor position - bug
+            numberType = decimal(num);
+
+            if (numberType == false)
+            {
+              printFloat = num;
+            }
+            else
+            {
+              printInt = num;
+            }
+
             if (eCount % 2 == 0)
             {
               clearLcd();
-              lcd.print(num);
+              if (numberType == false)
+              {
+                printFloat = num;
+                lcd.print(printFloat);
+              }
+              else
+              {
+                printInt = num;
+                lcd.print(printInt);
+              }
               lcd.print(firstRow);
               lcd.setCursor(0, 1);
               lcd.print(secondRow);
@@ -503,7 +556,16 @@ void mathematic(void)
               clearLcd();
               lcd.print(firstRow);
               lcd.setCursor(0, 1);
-              lcd.print(num);
+              if (numberType == false)
+              {
+                printFloat = num;
+                lcd.print(printFloat);
+              }
+              else
+              {
+                printInt = num;
+                lcd.print(printInt);
+              }
               lcd.print(secondRow);
               break;
             }
@@ -564,6 +626,24 @@ void play(void)
     {     
       seq = 0;
     }
+  }
+}
+
+// decimal point editor function
+bool decimal(float num)
+{
+  // declare variables
+  int x = num;
+  float check = num - x;
+
+  // if number is float return false, if integer return true
+  if (check > 0)
+  {
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }
 
