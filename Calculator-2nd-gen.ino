@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.1.2
+v 0.2.0
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -12,8 +12,6 @@ GitHub: Orelptacnik
 Delete serial prints after tests
 Square root bug
 In the end optimize and delete duplicates of code
-Edit restoring values to lcd - should work if cursor position is monitored and used after restoring row -> EDIT: bug happens because
-of string that is like "1+1            " - you are typing outside of lcd - edit string so it prints only characters and tńot blank space
 */
 
 #include <LiquidCrystal_I2C.h>
@@ -201,15 +199,11 @@ void mathematic(void)
   char op;
   // managing print section variables
   int eCount = 0;
-  char firstRow[] = "                ";
-  char secondRow[] = "                ";
-  int fPos = 0;
-  int sPos = 0;
+  String firstRow = "";
+  String secondRow = "";
   bool numberType;
   int printInt;
   float printFloat;
-  int xPos = 0;
-  int yPos = 0;
   int length;
 
   clearLcd();
@@ -245,13 +239,11 @@ void mathematic(void)
       if (mainKey == '√')
       {
         lcd.print("\xE8");
-        xPos++;
       }
       // print every key except #
       else if (mainKey != '#')
       {
         lcd.print(mainKey);
-        xPos++;
       }
 
       // play music function
@@ -262,8 +254,7 @@ void mathematic(void)
       {
         if (mainKey != '#')
         {
-          firstRow[fPos] = mainKey;
-          fPos++;
+          firstRow = firstRow + mainKey;
         }
         
         Serial.print("First: ");
@@ -273,8 +264,7 @@ void mathematic(void)
       {
         if (mainKey != '#')
         {
-          secondRow[sPos] = mainKey;
-          sPos++;
+          secondRow = secondRow + mainKey;
         }
         
         Serial.print("Second: ");
@@ -422,63 +412,48 @@ void mathematic(void)
           num = num1 * num2;
         }
 
+        // delete unnecessary zeros 1.00 - store the new number
         numberType = decimal(num);
 
         // choose row to print
         if (eCount % 2 == 0)
         {
-          // clear lcd
-          lcd.setCursor(0, 1);
-          lcd.print("                ");
-          lcd.setCursor(0, 1);
           if (numberType == false)
           {
             printFloat = num;
-            lcd.print(printFloat);
+            secondRow = printFloat;
           }
-          else
+          else 
           {
             printInt = num;
-            lcd.print(printInt);
+            secondRow = printInt;
           }
           
-          // clear stored row
-          for (int i = 0; i < sPos; i++)
-          {
-            secondRow[i] = ' ';
-          }
-          sPos = 0;
-          yPos = 1;
+          lcd.setCursor(0, 1);
+          lcd.print("                ");
+          lcd.setCursor(0, 1);
+          lcd.print(secondRow);
         }
         else
         {
-          // clear lcd
-          lcd.setCursor(0, 0);
-          lcd.print("                ");
-          lcd.setCursor(0, 0);
           if (numberType == false)
           {
             printFloat = num;
-            lcd.print(printFloat);
+            firstRow = printFloat;
           }
-          else
+          else 
           {
             printInt = num;
-            lcd.print(printInt);
+            firstRow = printInt;
           }
 
-          // clear stored row
-          for (int i = 0; i < fPos; i++)
-          {
-            firstRow[i] = ' ';
-          }
-          fPos = 0;
-          yPos = 0;
+          lcd.setCursor(0, 0);
+          lcd.print("                ");
+          lcd.setCursor(0, 0);
+          lcd.print(firstRow);
         }
-
         // increase number that decides row where to print and change cursor position
         eCount++;
-        xPos = 0;
       }
 
       // when # was pressed
@@ -494,6 +469,7 @@ void mathematic(void)
         while(true)
         {
           mainKey = mainKeypad.getKey();
+
           if (mainKey)
           {
             if (mainKey == '0')
@@ -522,59 +498,28 @@ void mathematic(void)
               keyboardType = 4; // wrong input
             }
 
-            // restore values to lcd - bad cursor position - bug
-            numberType = decimal(num);
+            // restore values to lcd
+            Serial.print("Stored number:");
+            Serial.println(num);
 
-            // get length of number
-            printInt = num;
-            length = lengthNum(printInt);
-
-            if (eCount % 2 == 0)
+            clearLcd();
+            
+            if (eCount % 2 != 0)
             {
-              clearLcd();
-              if (numberType == false)
-              {        
-                printFloat = num;
-                lcd.print(printFloat);
-                xPos = xPos + 2 + length;
-              }
-              else
-              {
-                printInt = num;
-                lcd.print(printInt);
-                xPos += length;
-              }
-              lcd.setCursor(xPos, 0);
               lcd.print(firstRow);
               lcd.setCursor(0, 1);
               lcd.print(secondRow);
-              break;
             }
             else
             {
-              clearLcd();
-              lcd.print(firstRow);
               lcd.setCursor(0, 1);
-              if (numberType == false)
-              {        
-                printFloat = num;
-                lcd.print(printFloat);
-                xPos = xPos + 2 + length;
-              }
-              else
-              {
-                printInt = num;
-                lcd.print(printInt);
-                xPos += length;
-              }
-              lcd.setCursor(xPos, 1);
               lcd.print(secondRow);
-              break;
+              lcd.setCursor(0, 0);
+              lcd.print(firstRow);
             }
+            break;
           }
         }
-        Serial.println(keyboardType);
-        Serial.println(xPos);
       }
 
       // when some op is pressed
