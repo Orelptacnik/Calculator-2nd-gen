@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.0
+v 0.2.1
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -10,7 +10,6 @@ Created 14. 5. 2024
 GitHub: Orelptacnik
 -------------------
 Delete serial prints after tests
-Square root bug
 In the end optimize and delete duplicates of code
 */
 
@@ -18,6 +17,7 @@ In the end optimize and delete duplicates of code
 #include <Keypad.h>
 #include <pitches.h>
 #include <string.h>
+#include <math.h>
 
 // functions
 void mathematic(void);
@@ -55,26 +55,16 @@ char mainKeys[ROWS][COLS] =
 
 char aditionMathKeys[ROWS][COLS] = 
 {
-  { '.', '-', '^', 'd' }, // decimal, negative, square x, delete
-  { '√', 'x√', 'p', 'c' }, // sqroot 2, sqroot x, pi, clear
-  { '%', 'x', 'x', 'a' }, // remain, nothing, nothing, ans
-  { 'm', 'x', '#', 'y' } // main menu, nothing, changeKey, approve - sqr(root)
-};
-
-char goniometricKeys[ROWS][COLS] = 
-{
-  { 's', 'S', 'x', 'u' }, // sinus, arcusSinus, nothing, change units
-  { 'c', 'C', 'x', 'd' }, // cosinus, arcusCosinus, nothing, degrees
-  { 't', 'T', 'x', 'c' }, // tangens, cotangens, nothing, clear
-  { 'd', 'a', '#', 'y' } // delete, ans, changeKey, approve - goniometric
+  { '-', '.', '^', '°' }, // negative, decimal, square x, degrees
+  { 'N', 'r', 'p', 'D' }, // arcus Cotangens, sqroot x, pi, change to degrees
+  { 's', 'S', 'c', 'C' }, // sinus, arcus sinus, cosinus, arcus cosinus
+  { 't', 'T', '#', 'n' } // tangens, arcus tangens, changeKey, cotangens
 };
 
 // create var for certain keypad - add other later if needed
 Keypad mainKeypad = Keypad(makeKeymap(mainKeys), rowPins, colPins, ROWS, COLS);
 
 Keypad aditionMathKeypad = Keypad(makeKeymap(aditionMathKeys), rowPins, colPins, ROWS, COLS);
-
-Keypad goniometricKeypad = Keypad(makeKeymap(goniometricKeys), rowPins, colPins, ROWS, COLS);
 
 // variables to store which keyboard use
 char mainKey;
@@ -125,9 +115,16 @@ void setup() {
     tone(12, startup[i], startupDuration[i]);
     delay(startupDuration[i] + 10);
   }
+  
+  //print opening message
+  lcd.setCursor(0, 0);
+  lcd.print("Calculator 2.Gen");
+  lcd.setCursor(0, 1);
+  lcd.print("Version 0.2.1");
+  delay(3000);
+  lcd.clear();
 
   // print menu select
-  lcd.setCursor(0, 0);
   lcd.print("Choose mod 1-5");
   lcd.setCursor(0, 1);
   lcd.print("Credits -> D");
@@ -205,6 +202,8 @@ void mathematic(void)
   int printInt;
   float printFloat;
   int length;
+  const char pi {247};
+  const char sqrRoot {232};
 
   clearLcd();
 
@@ -220,10 +219,6 @@ void mathematic(void)
     {
       mainKey = aditionMathKeypad.getKey();
     }
-    else if (keyboardType == 2)
-    {
-      mainKey = goniometricKeypad.getKey();
-    }
     else
     {
       lcd.setCursor(0, 0);
@@ -235,13 +230,8 @@ void mathematic(void)
     // when key is pressed
     if (mainKey)
     {
-      // non-functional condition - sqrroot is invalid char - try to fix it
-      if (mainKey == '√')
-      {
-        lcd.print("\xE8");
-      }
       // print every key except #
-      else if (mainKey != '#')
+      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
       {
         lcd.print(mainKey);
       }
@@ -252,7 +242,7 @@ void mathematic(void)
       // store operations on each row
       if (eCount % 2 == 0)
       {
-        if (mainKey != '#')
+        if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
         {
           firstRow = firstRow + mainKey;
         }
@@ -262,13 +252,39 @@ void mathematic(void)
       }
       else
       {
-        if (mainKey != '#')
+        if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
         {
           secondRow = secondRow + mainKey;
         }
         
         Serial.print("Second: ");
         Serial.println(secondRow);
+      }
+
+      if (mainKey == 'p')
+      {
+        lcd.print(pi);
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + pi;
+        }
+        else
+        {
+          secondRow = secondRow + pi;
+        }
+      }
+
+      if (mainKey == 'r')
+      {
+        lcd.print(sqrRoot);
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + sqrRoot;
+        }
+        else
+        {
+          secondRow = secondRow + sqrRoot;
+        }
       }
 
       // when 1 was pressed
@@ -461,7 +477,7 @@ void mathematic(void)
       {
         // print menu
         clearLcd();
-        lcd.print("Choose mod 0-3");
+        lcd.print("Choose mod 0-1");
         lcd.setCursor(0, 1);
         lcd.print("A -> DEL, B -> C");
 
