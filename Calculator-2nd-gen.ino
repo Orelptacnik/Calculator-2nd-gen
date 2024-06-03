@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.1
+v 0.2.2
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -120,7 +120,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.1");
+  lcd.print("Version 0.2.2");
   delay(3000);
   lcd.clear();
 
@@ -202,8 +202,12 @@ void mathematic(void)
   int printInt;
   float printFloat;
   int length;
+  // define special characters
   const char pi {247};
   const char sqrRoot {232};
+  // decimal point variables
+  bool isDecimal = false;
+  int dCount = 10;
 
   clearLcd();
 
@@ -290,116 +294,261 @@ void mathematic(void)
       // when 1 was pressed
       if (mainKey == '1') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 1;
+          if (num == 0)
+          {
+            num = 0.1;
+          }
+          else 
+          {
+            num = (num * dCount + 1) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 1;
+          if (num == 0) 
+          {
+            num = 1;
+          }
+          else 
+          {
+            num = (num * 10) + 1;
+          }
         }
       }
 
       // when 2 was pressed
       if (mainKey == '2') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 2;
+          if (num == 0)
+          {
+            num = 0.2;
+          }
+          else 
+          {
+            num = (num * dCount + 2) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 2;
+          if (num == 0) 
+          {
+            num = 2;
+          }
+          else 
+          {
+            num = (num * 10) + 2;
+          }
         }
       }
 
       // when 3 was pressed
       if (mainKey == '3') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 3;
+          if (num == 0)
+          {
+            num = 0.3;
+          }
+          else 
+          {
+            num = (num * dCount + 3) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 3;
+          if (num == 0) 
+          {
+            num = 3;
+          }
+          else 
+          {
+            num = (num * 10) + 3;
+          }
         }
       }
 
       // when 4 was pressed
       if (mainKey == '4') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 4;
+          if (num == 0)
+          {
+            num = 0.4;
+          }
+          else 
+          {
+            num = (num * dCount + 4) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 4;
-        }
+          if (num == 0) 
+          {
+            num = 4;
+          }
+          else 
+          {
+            num = (num * 10) + 4;
+          }
+        }    
       }
 
       // when 5 was pressed
       if (mainKey == '5') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 5;
+          if (num == 0)
+          {
+            num = 0.5;
+          }
+          else 
+          {
+            num = (num * dCount + 5) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 5;
+          if (num == 0) 
+          {
+            num = 5;
+          }
+          else 
+          {
+            num = (num * 10) + 5;
+          }
         }
       }
 
       // when 6 was pressed
       if (mainKey == '6') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 6;
+          if (num == 0)
+          {
+            num = 0.6;
+          }
+          else 
+          {
+            num = (num * dCount + 6) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 6;
-        }
+          if (num == 0) 
+          {
+            num = 6;
+          }
+          else 
+          {
+            num = (num * 10) + 6;
+          }
+        }      
       }
+
       // when 7 was pressed
       if (mainKey == '7') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 7;
+          if (num == 0)
+          {
+            num = 0.7;
+          }
+          else 
+          {
+            num = (num * dCount + 7) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 7;
-        }
+          if (num == 0) 
+          {
+            num = 7;
+          }
+          else 
+          {
+            num = (num * 10) + 7;
+          }
+        }    
       }
 
       // when 8 was pressed
       if (mainKey == '8') 
       { 
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 8;
+          if (num == 0)
+          {
+            num = 0.8;
+          }
+          else 
+          {
+            num = (num * dCount + 8) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 8;
-        }
+          if (num == 0) 
+          {
+            num = 8;
+          }
+          else 
+          {
+            num = (num * 10) + 8;
+          }
+        }      
       }
 
       // when 9 was pressed
       if (mainKey == '9') 
       {
-        if (num == 0) 
+        if (isDecimal == true)
         {
-          num = 9;
+          if (num == 0)
+          {
+            num = 0.9;
+          }
+          else 
+          {
+            num = (num * dCount + 9) / dCount;
+            
+          }
+          dCount *= 10;
         }
-        else 
+        else
         {
-          num = (num * 10) + 9;
+          if (num == 0) 
+          {
+            num = 9;
+          }
+          else 
+          {
+            num = (num * 10) + 9;
+          }
         }
       }
 
@@ -437,7 +586,7 @@ void mathematic(void)
           if (numberType == false)
           {
             printFloat = num;
-            secondRow = printFloat;
+            secondRow = String(printFloat, 3);
           }
           else 
           {
@@ -455,7 +604,7 @@ void mathematic(void)
           if (numberType == false)
           {
             printFloat = num;
-            firstRow = printFloat;
+            firstRow = String(printFloat, 3);
           }
           else 
           {
@@ -470,6 +619,8 @@ void mathematic(void)
         }
         // increase number that decides row where to print and change cursor position
         eCount++;
+        isDecimal = false;
+        dCount = 10;
       }
 
       // when # was pressed
@@ -536,14 +687,24 @@ void mathematic(void)
             break;
           }
         }
+        delay(300);
       }
 
       // when some op is pressed
       if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
       {
+        Serial.print("num: ");
+        Serial.println(num);
         op = mainKey;
         num1 = num;
         num = 0;
+        isDecimal = false;
+        dCount = 10;
+      }
+
+      if (mainKey == '.')
+      {
+        isDecimal = true;
       }
     }
   }
