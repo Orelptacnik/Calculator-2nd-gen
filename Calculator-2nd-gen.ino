@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.2
+v 0.2.3
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -55,7 +55,7 @@ char mainKeys[ROWS][COLS] =
 
 char aditionMathKeys[ROWS][COLS] = 
 {
-  { '-', '.', '^', '°' }, // negative, decimal, square x, degrees
+  { 'm', '.', '^', '°' }, // negative, decimal, square x, degrees
   { 'N', 'r', 'p', 'D' }, // arcus Cotangens, sqroot x, pi, change to degrees
   { 's', 'S', 'c', 'C' }, // sinus, arcus sinus, cosinus, arcus cosinus
   { 't', 'T', '#', 'n' } // tangens, arcus tangens, changeKey, cotangens
@@ -120,7 +120,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.2");
+  lcd.print("Version 0.2.3");
   delay(3000);
   lcd.clear();
 
@@ -208,6 +208,7 @@ void mathematic(void)
   // decimal point variables
   bool isDecimal = false;
   int dCount = 10;
+  bool negative = false;
 
   clearLcd();
 
@@ -234,36 +235,28 @@ void mathematic(void)
     // when key is pressed
     if (mainKey)
     {
-      // print every key except #
-      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
+      // print every key except:
+      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r' && mainKey != 'm')
       {
         lcd.print(mainKey);
+      
+        // store operations on each row
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + mainKey;      
+          Serial.print("First: ");
+          Serial.println(firstRow);
+        }
+        else
+        {
+          secondRow = secondRow + mainKey;
+          Serial.print("Second: ");
+          Serial.println(secondRow);
+        }
       }
 
       // play music function
       play();
-      
-      // store operations on each row
-      if (eCount % 2 == 0)
-      {
-        if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
-        {
-          firstRow = firstRow + mainKey;
-        }
-        
-        Serial.print("First: ");
-        Serial.println(firstRow);
-      }
-      else
-      {
-        if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
-        {
-          secondRow = secondRow + mainKey;
-        }
-        
-        Serial.print("Second: ");
-        Serial.println(secondRow);
-      }
 
       if (mainKey == 'p')
       {
@@ -552,9 +545,32 @@ void mathematic(void)
         }
       }
 
+      // when negative (-) was presse
+      if (mainKey == 'm')
+      {
+        negative = true;
+        lcd.print("-");
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "-";
+        }
+        else
+        {
+          secondRow = secondRow + "-";
+        }
+      }
+
       // when = was pressed
       if (mainKey == '=')
       {
+        //initalize num as negative if selected
+        if (negative == true)
+        {
+          num = num * -1;
+          negative = false;
+        }
+
         // choose operation
         if (op == '+')
         {          
@@ -695,6 +711,14 @@ void mathematic(void)
       {
         Serial.print("num: ");
         Serial.println(num);
+
+        //initalize num as negative if selected
+        if (negative == true)
+        {
+          num = num * -1;
+          negative = false;
+        }
+
         op = mainKey;
         num1 = num;
         num = 0;
