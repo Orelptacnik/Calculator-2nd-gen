@@ -218,6 +218,10 @@ void mathematic(void)
   float sqrNum;
   bool square = false;
 
+  // variables for square root
+  float sqrRootNum;
+  bool squareRoot = false;
+
 
   clearLcd();
 
@@ -282,7 +286,12 @@ void mathematic(void)
 
       if (mainKey == 'r')
       {
+        squareRoot = true;
+        sqrRootNum = num;
+        num = 0;
+
         lcd.print(sqrRoot);
+
         if (eCount % 2 == 0)
         {
           firstRow = firstRow + sqrRoot;
@@ -592,6 +601,15 @@ void mathematic(void)
         {
           num = pow(sqrNum, num);
           square = false;
+          op = 'n';
+        }
+
+        // if square root is used
+        if (squareRoot == true)
+        {
+          num = pow(num, 1 / sqrRootNum);
+          squareRoot = false;
+          op = 'n';
         }
 
         // choose operation
@@ -667,7 +685,7 @@ void mathematic(void)
       {
         // print menu
         clearLcd();
-        lcd.print("Choose mod 0-1");
+        lcd.print("Choose mod 1-2");
         lcd.setCursor(0, 1);
         lcd.print("A -> DEL, B -> C");
 
@@ -678,18 +696,14 @@ void mathematic(void)
 
           if (mainKey)
           {
-            if (mainKey == '0')
+            if (mainKey == '1')
             {
               keyboardType = 0; // main
             }
-            else if (mainKey == '1')
+            else if (mainKey == '2')
             {
               keyboardType = 1; // aditionMath
 
-            }
-            else if (mainKey == '2')
-            {
-              keyboardType = 2; // goniometricKeys
             }
             else if (mainKey == '+')
             {
@@ -747,6 +761,13 @@ void mathematic(void)
         {
           num = pow(sqrNum, num);
           square = false;
+        }
+
+        // if square root is used
+        if (squareRoot == true)
+        {
+          num = pow(num, 1 / sqrRootNum);
+          squareRoot = false;
         }
 
         op = mainKey;
@@ -811,7 +832,6 @@ void play(void)
 // decimal point editor function
 bool decimal(float num)
 {
-  // declare variables
   int x = num;
   float check = num - x;
 
