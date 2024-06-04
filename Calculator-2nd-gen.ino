@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.4
+v 0.2.5
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -119,7 +119,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.4");
+  lcd.print("Version 0.2.5");
   delay(3000);
   lcd.clear();
 
@@ -632,6 +632,29 @@ void mathematic(void)
         {          
           num2 = num;
           num = num1 * num2;
+        }
+
+        if (op == '+' && num1 == 1 && num2 == 1)
+        {
+          clearLcd();
+          lcd.print("We are checking.");
+          delay(3000);
+          clearLcd();
+          lcd.print("Touch some grass");
+          lcd.setCursor(0, 1);
+          lcd.print(";.,;;:,:;,:.;,.;");
+          delay(3000);
+          clearLcd();
+
+          if (eCount % 2 == 0)
+          {
+            lcd.print(firstRow);
+          }
+          else
+          {
+            lcd.setCursor(0, 1);
+            lcd.print(secondRow);
+          }
         }
 
         // delete unnecessary zeros 1.00 - store the new number
