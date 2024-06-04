@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.3
+v 0.2.4
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -119,7 +119,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.3");
+  lcd.print("Version 0.2.4");
   delay(3000);
   lcd.clear();
 
@@ -191,8 +191,10 @@ void mathematic(void)
   float num = 0;
   float num1 = 0;
   float num2 = 0;
+
   // storing operator
   char op;
+
   // managing print section variables
   int eCount = 0;
   String firstRow = "";
@@ -200,13 +202,22 @@ void mathematic(void)
   bool numberType;
   int printInt;
   float printFloat;
+
   // define special characters
   const char pi {247};
   const char sqrRoot {232};
+
   // decimal point variables
   bool isDecimal = false;
   int dCount = 10;
+
+  //negative num var
   bool negative = false;
+
+  // variables for square
+  float sqrNum;
+  bool square = false;
+
 
   clearLcd();
 
@@ -559,6 +570,13 @@ void mathematic(void)
         }
       }
 
+      if (mainKey == '^')
+      {
+        sqrNum = num;
+        num = 0;
+        square = true;
+      }
+
       // when = was pressed
       if (mainKey == '=')
       {
@@ -567,6 +585,13 @@ void mathematic(void)
         {
           num = num * -1;
           negative = false;
+        }
+
+        // if square is used
+        if (square == true)
+        {
+          num = pow(sqrNum, num);
+          square = false;
         }
 
         // choose operation
@@ -715,6 +740,13 @@ void mathematic(void)
         {
           num = num * -1;
           negative = false;
+        }
+
+        // if square is used
+        if (square == true)
+        {
+          num = pow(sqrNum, num);
+          square = false;
         }
 
         op = mainKey;
