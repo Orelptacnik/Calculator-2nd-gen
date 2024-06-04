@@ -30,7 +30,6 @@ void credit(void);
 void play(void);
 void clearLcd(void);
 bool decimal(float num);
-int lengthNum(float printFloat);
 
 // initialize lcd
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -201,7 +200,6 @@ void mathematic(void)
   bool numberType;
   int printInt;
   float printFloat;
-  int length;
   // define special characters
   const char pi {247};
   const char sqrRoot {232};
@@ -794,20 +792,6 @@ bool decimal(float num)
   {
     return true;
   }
-}
-
-// length of number function float/integer
-int lengthNum(int numberInt)
-{
-  int length = 0;
-
-  while (numberInt > 0)
-  {
-    numberInt /= 10;
-    length++;
-  }
-
-  return length;
 }
 
 // clear lcd function
