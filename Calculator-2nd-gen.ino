@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.6
+v 0.3.0
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -119,7 +119,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.6");
+  lcd.print("Version 0.3.0");
   delay(3000);
   lcd.clear();
 
@@ -222,6 +222,11 @@ void mathematic(void)
   float sqrRootNum;
   bool squareRoot = false;
 
+  // goniometric function variables
+  bool function = false;
+  char functionType;
+  float multipleF = 1;
+
 
   clearLcd();
 
@@ -248,8 +253,10 @@ void mathematic(void)
     // when key is pressed
     if (mainKey)
     {
+      Serial.println(num);
       // print every key except:
-      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r' && mainKey != 'm')
+      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r' && mainKey != 'm' && mainKey != 's' && mainKey != 'S' && mainKey != 'c'
+          && mainKey != 'C' && mainKey != 't' && mainKey != 'T' && mainKey != 'n' && mainKey != 'N')
       {
         lcd.print(mainKey);
       
@@ -301,6 +308,36 @@ void mathematic(void)
         else
         {
           secondRow = secondRow + sqrRoot;
+        }
+      }
+
+      // when 0 is pressed
+      if (mainKey == '0')
+      {
+
+        if (isDecimal == true)
+        {
+          if (num == 0)
+          {
+            num = 0.0;
+          }
+          else 
+          {
+            num = (num * dCount + 0) / dCount;
+            
+          }
+          dCount *= 10;
+        }
+        else
+        {
+          if (num == 0) 
+          {
+            num = 0;
+          }
+          else 
+          {
+            num = (num * 10) + 0;
+          }
         }
       }
 
@@ -581,11 +618,204 @@ void mathematic(void)
         }
       }
 
+      // when square was pressed
       if (mainKey == '^')
       {
         sqrNum = num;
         num = 0;
         square = true;
+      }
+
+      // when sinus was pressed
+      if (mainKey == 's')
+      {
+        lcd.print("sin");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }                
+
+        function = true;
+        functionType = 's';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "sin";
+        }
+        else
+        {
+          secondRow = secondRow + "sin";
+        }
+      }
+
+      // when arcus sinus was pressed
+      if (mainKey == 'S')
+      {
+        lcd.print("aSin");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'S';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aSin";
+        }
+        else
+        {
+          secondRow = secondRow + "aSin";
+        }
+      }
+
+      // when cosinus was pressed
+      if (mainKey == 'c')
+      {
+        lcd.print("cos");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'c';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "cos";
+        }
+        else
+        {
+          secondRow = secondRow + "cos";
+        }
+      }
+
+      // when arcus cosinus was pressed
+      if (mainKey == 'C')
+      {
+        lcd.print("aCos");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+        
+        function = true;
+        functionType = 'C';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aCos";
+        }
+        else
+        {
+          secondRow = secondRow + "aCos";
+        }
+      }
+
+      // when tangens was pressed
+      if (mainKey == 't')
+      {
+        lcd.print("tan");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 't';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "tan";
+        }
+        else
+        {
+          secondRow = secondRow + "tan";
+        }
+      }
+
+      // when arcus tangens was pressed
+      if (mainKey == 'T')
+      {
+        lcd.print("aTan");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'T';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aTan";
+        }
+        else
+        {
+          secondRow = secondRow + "aTan";
+        }
+      }
+
+      // when cotangens was pressed
+      if (mainKey == 'n')
+      {
+        lcd.print("ctn");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'n';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "ctn";
+        }
+        else
+        {
+          secondRow = secondRow + "ctn";
+        }
+      }
+
+      // when arcus cotanges was pressed
+      if (mainKey == 'N')
+      {
+        lcd.print("aCtn");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'N';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aCtn";
+        }
+        else
+        {
+          secondRow = secondRow + "aCtn";
+        }
       }
 
       // when = was pressed
@@ -612,6 +842,51 @@ void mathematic(void)
           num = pow(num, 1 / sqrRootNum);
           squareRoot = false;
           op = 'n';
+        }
+
+        // if goniometric function is used
+        if (function == true)
+        {
+          if (functionType == 's')
+          {
+            num = sin(radians(num));    
+            num *= multipleF;
+          }
+          else if (functionType == 'S')
+          {
+            num = asin(num);
+            num = num * 180 / M_PI; // convert to degrees
+          }
+          else if (functionType == 'c')
+          {
+            num = cos(radians(num));
+          }
+          else if (functionType == 'C')
+          {
+            num = acos(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 't')
+          {
+            num = tan(radians(num));           
+          }
+          else if (functionType == 'T')
+          {
+            num = atan(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 'n')
+          {
+            num = cos(radians(num)) / sin (radians(num));
+          }
+          else if (functionType == 'N')
+          {
+            num = atan(1 / num);
+            num = num * 180 / M_PI;
+          }
+          
+          multipleF = 1;
+          functionType = false;
         }
 
         // choose operation
@@ -730,6 +1005,51 @@ void mathematic(void)
         {
           num = pow(num, 1 / sqrRootNum);
           squareRoot = false;
+        }
+
+        // if goniometric function is used
+        if (function == true)
+        {
+          if (functionType == 's')
+          {
+            num = sin(radians(num));    
+            num *= multipleF;
+          }
+          else if (functionType == 'S')
+          {
+            num = asin(num);
+            num = num * 180 / M_PI; // convert to degrees
+          }
+          else if (functionType == 'c')
+          {
+            num = cos(radians(num));
+          }
+          else if (functionType == 'C')
+          {
+            num = acos(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 't')
+          {
+            num = tan(radians(num));
+          }
+          else if (functionType == 'T')
+          {
+            num = atan(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 'n')
+          {
+            num = cos(radians(num)) / sin (radians(num));
+          }
+          else if (functionType == 'N')
+          {
+            num = atan(1 / num);
+            num = num * 180 / M_PI;
+          }
+          
+          multipleF = 1;
+          functionType = false;
         }
 
         op = mainKey;
