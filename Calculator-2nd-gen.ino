@@ -274,6 +274,8 @@ void mathematic(void)
       if (mainKey == 'p')
       {
         lcd.print(pi);
+        num = M_PI;
+        
         if (eCount % 2 == 0)
         {
           firstRow = firstRow + pi;
