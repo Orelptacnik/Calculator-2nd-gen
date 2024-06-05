@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.5
+v 0.2.6
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -119,7 +119,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.5");
+  lcd.print("Version 0.2.6");
   delay(3000);
   lcd.clear();
 
@@ -275,7 +275,7 @@ void mathematic(void)
       {
         lcd.print(pi);
         num = M_PI;
-        
+
         if (eCount % 2 == 0)
         {
           firstRow = firstRow + pi;
@@ -705,6 +705,51 @@ void mathematic(void)
         dCount = 10;
       }
 
+      // when some op is pressed
+      if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
+      {
+        Serial.print("num: ");
+        Serial.println(num);
+
+        //initalize num as negative if selected
+        if (negative == true)
+        {
+          num = num * -1;
+          negative = false;
+        }
+
+        // if square is used
+        if (square == true)
+        {
+          num = pow(sqrNum, num);
+          square = false;
+        }
+
+        // if square root is used
+        if (squareRoot == true)
+        {
+          num = pow(num, 1 / sqrRootNum);
+          squareRoot = false;
+        }
+
+        op = mainKey;
+        num1 = num;
+        num = 0;
+        isDecimal = false;
+        dCount = 10;
+      }
+
+      if (mainKey == '.')
+      {
+        isDecimal = true;
+      }
+
+      // automatically change keypad to default after using optional key
+      if (keyboardType == 1)
+      {
+        keyboardType = 0;
+      }
+
       // when # was pressed
       if (mainKey == '#')
       {
@@ -766,45 +811,6 @@ void mathematic(void)
           }
         }
         delay(300);
-      }
-
-      // when some op is pressed
-      if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
-      {
-        Serial.print("num: ");
-        Serial.println(num);
-
-        //initalize num as negative if selected
-        if (negative == true)
-        {
-          num = num * -1;
-          negative = false;
-        }
-
-        // if square is used
-        if (square == true)
-        {
-          num = pow(sqrNum, num);
-          square = false;
-        }
-
-        // if square root is used
-        if (squareRoot == true)
-        {
-          num = pow(num, 1 / sqrRootNum);
-          squareRoot = false;
-        }
-
-        op = mainKey;
-        num1 = num;
-        num = 0;
-        isDecimal = false;
-        dCount = 10;
-      }
-
-      if (mainKey == '.')
-      {
-        isDecimal = true;
       }
     }
   }
