@@ -782,6 +782,13 @@ void mathematic(void)
             else if (mainKey == '-')
             {
               // completely clear all values and lcd
+              num = 0;
+              num1 = 0;
+              num2 = 0;
+              op = 'n';
+              eCount = 0;
+              firstRow = "";
+              secondRow = "";
             }
             else
             {
