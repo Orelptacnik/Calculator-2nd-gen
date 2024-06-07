@@ -206,6 +206,7 @@ void mathematic(void)
   // define special characters
   const char pi {247};
   const char sqrRoot {232};
+  const char degree {223};
 
   // decimal point variables
   bool isDecimal = false;
@@ -256,7 +257,7 @@ void mathematic(void)
       Serial.println(num);
       // print every key except:
       if (mainKey != '#' && mainKey != 'p' && mainKey != 'r' && mainKey != 'm' && mainKey != 's' && mainKey != 'S' && mainKey != 'c'
-          && mainKey != 'C' && mainKey != 't' && mainKey != 'T' && mainKey != 'n' && mainKey != 'N')
+          && mainKey != 'C' && mainKey != 't' && mainKey != 'T' && mainKey != 'n' && mainKey != 'N' && mainKey != 'D')
       {
         lcd.print(mainKey);
       
@@ -309,6 +310,29 @@ void mathematic(void)
         {
           secondRow = secondRow + sqrRoot;
         }
+      }
+
+      if (mainKey == 'D')
+      {
+        eCount++;
+        int deg = int(num);
+        float fractionalPart = num - deg;
+        int minutes = int(fractionalPart * 60);
+        float seconds = (fractionalPart * 60 - minutes) * 60;
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+        }
+        else
+        {
+          secondRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+        }
+
+        clearLcd();
+        lcd.print(firstRow);
+        lcd.setCursor(0, 1);
+        lcd.print(secondRow);
       }
 
       // when 0 is pressed
