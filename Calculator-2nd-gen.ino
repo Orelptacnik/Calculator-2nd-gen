@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.3.0
+v 0.3.1
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -119,7 +119,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.3.0");
+  lcd.print("Version 0.3.1");
   delay(3000);
   lcd.clear();
 
@@ -228,6 +228,10 @@ void mathematic(void)
   char functionType;
   float multipleF = 1;
 
+  // degrees variables
+  bool isDegree = false;
+  bool isSecond = false;
+
 
   clearLcd();
 
@@ -314,25 +318,81 @@ void mathematic(void)
 
       if (mainKey == 'D')
       {
-        eCount++;
         int deg = int(num);
         float fractionalPart = num - deg;
         int minutes = int(fractionalPart * 60);
         float seconds = (fractionalPart * 60 - minutes) * 60;
 
-        if (eCount % 2 == 0)
+        if (isDegree == false)
         {
-          firstRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+          if (isSecond == false)
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+            else
+            {
+              secondRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+          }
+          else
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = String(num1) + String(op) + String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+            else
+            {
+              secondRow = String(num1) + String(op) + String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+          }
+
+          isDegree = true;
         }
         else
         {
-          secondRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+          if (isSecond == false)
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = num;
+            }
+            else
+            {
+              secondRow = num;
+            }
+          }
+          else
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = String(num1) + String(op) + String(num);
+            }
+            else
+            {
+              secondRow = String(num1) + String(op) + String(num);
+            }
+          }
+
+          isDegree = false;
         }
 
-        clearLcd();
-        lcd.print(firstRow);
-        lcd.setCursor(0, 1);
-        lcd.print(secondRow);
+        if (eCount % 2 == 0)
+        {
+          clearLcd();
+          lcd.setCursor(0, 1);
+          lcd.print(secondRow);
+          lcd.setCursor(0, 0);
+          lcd.print(firstRow);         
+        }
+        else
+        {
+          clearLcd();
+          lcd.print(firstRow);
+          lcd.setCursor(0, 1);
+          lcd.print(secondRow);
+        }
       }
 
       // when 0 is pressed
@@ -1002,6 +1062,8 @@ void mathematic(void)
         eCount++;
         isDecimal = false;
         dCount = 10;
+        isSecond = false;
+        isDegree = false;
       }
 
       // when some op is pressed
@@ -1081,6 +1143,8 @@ void mathematic(void)
         num = 0;
         isDecimal = false;
         dCount = 10;
+        isSecond = true;
+        isDegree = false;
       }
 
       if (mainKey == '.')
@@ -1133,6 +1197,8 @@ void mathematic(void)
               eCount = 0;
               firstRow = "";
               secondRow = "";
+              isDegree = false;
+              isSecond = false;
             }
             else
             {
