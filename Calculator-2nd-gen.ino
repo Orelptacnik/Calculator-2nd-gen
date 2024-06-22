@@ -1,6 +1,6 @@
 /*
 Calculator 2nd gen
-v 0.2.2
+v 0.3.1
 ------------------
 Advanced arduino calculator
 Arduino MEGA 2560, membrane switch module, lcd 1602, passive buzzer, 3D printed parts
@@ -30,7 +30,6 @@ void credit(void);
 void play(void);
 void clearLcd(void);
 bool decimal(float num);
-int lengthNum(float printFloat);
 
 // initialize lcd
 LiquidCrystal_I2C lcd(0x27, 20, 4);
@@ -55,7 +54,7 @@ char mainKeys[ROWS][COLS] =
 
 char aditionMathKeys[ROWS][COLS] = 
 {
-  { '-', '.', '^', '°' }, // negative, decimal, square x, degrees
+  { 'm', '.', '^', '°' }, // negative, decimal, square x, degrees
   { 'N', 'r', 'p', 'D' }, // arcus Cotangens, sqroot x, pi, change to degrees
   { 's', 'S', 'c', 'C' }, // sinus, arcus sinus, cosinus, arcus cosinus
   { 't', 'T', '#', 'n' } // tangens, arcus tangens, changeKey, cotangens
@@ -120,7 +119,7 @@ void setup() {
   lcd.setCursor(0, 0);
   lcd.print("Calculator 2.Gen");
   lcd.setCursor(0, 1);
-  lcd.print("Version 0.2.2");
+  lcd.print("Version 0.3.1");
   delay(3000);
   lcd.clear();
 
@@ -192,8 +191,10 @@ void mathematic(void)
   float num = 0;
   float num1 = 0;
   float num2 = 0;
+
   // storing operator
   char op;
+
   // managing print section variables
   int eCount = 0;
   String firstRow = "";
@@ -201,13 +202,36 @@ void mathematic(void)
   bool numberType;
   int printInt;
   float printFloat;
-  int length;
+
   // define special characters
   const char pi {247};
   const char sqrRoot {232};
+  const char degree {223};
+
   // decimal point variables
   bool isDecimal = false;
   int dCount = 10;
+
+  //negative num var
+  bool negative = false;
+
+  // variables for square
+  float sqrNum;
+  bool square = false;
+
+  // variables for square root
+  float sqrRootNum;
+  bool squareRoot = false;
+
+  // goniometric function variables
+  bool function = false;
+  char functionType;
+  float multipleF = 1;
+
+  // degrees variables
+  bool isDegree = false;
+  bool isSecond = false;
+
 
   clearLcd();
 
@@ -234,40 +258,36 @@ void mathematic(void)
     // when key is pressed
     if (mainKey)
     {
-      // print every key except #
-      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
+      Serial.println(num);
+      // print every key except:
+      if (mainKey != '#' && mainKey != 'p' && mainKey != 'r' && mainKey != 'm' && mainKey != 's' && mainKey != 'S' && mainKey != 'c'
+          && mainKey != 'C' && mainKey != 't' && mainKey != 'T' && mainKey != 'n' && mainKey != 'N' && mainKey != 'D')
       {
         lcd.print(mainKey);
+      
+        // store operations on each row
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + mainKey;      
+          Serial.print("First: ");
+          Serial.println(firstRow);
+        }
+        else
+        {
+          secondRow = secondRow + mainKey;
+          Serial.print("Second: ");
+          Serial.println(secondRow);
+        }
       }
 
       // play music function
       play();
-      
-      // store operations on each row
-      if (eCount % 2 == 0)
-      {
-        if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
-        {
-          firstRow = firstRow + mainKey;
-        }
-        
-        Serial.print("First: ");
-        Serial.println(firstRow);
-      }
-      else
-      {
-        if (mainKey != '#' && mainKey != 'p' && mainKey != 'r')
-        {
-          secondRow = secondRow + mainKey;
-        }
-        
-        Serial.print("Second: ");
-        Serial.println(secondRow);
-      }
 
       if (mainKey == 'p')
       {
         lcd.print(pi);
+        num = M_PI;
+
         if (eCount % 2 == 0)
         {
           firstRow = firstRow + pi;
@@ -280,7 +300,12 @@ void mathematic(void)
 
       if (mainKey == 'r')
       {
+        squareRoot = true;
+        sqrRootNum = num;
+        num = 0;
+
         lcd.print(sqrRoot);
+
         if (eCount % 2 == 0)
         {
           firstRow = firstRow + sqrRoot;
@@ -288,6 +313,115 @@ void mathematic(void)
         else
         {
           secondRow = secondRow + sqrRoot;
+        }
+      }
+
+      if (mainKey == 'D')
+      {
+        int deg = int(num);
+        float fractionalPart = num - deg;
+        int minutes = int(fractionalPart * 60);
+        float seconds = (fractionalPart * 60 - minutes) * 60;
+
+        if (isDegree == false)
+        {
+          if (isSecond == false)
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+            else
+            {
+              secondRow = String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+          }
+          else
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = String(num1) + String(op) + String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+            else
+            {
+              secondRow = String(num1) + String(op) + String(deg) + degree + String(minutes) + "\'" + String(seconds) + "\"";
+            }
+          }
+
+          isDegree = true;
+        }
+        else
+        {
+          if (isSecond == false)
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = num;
+            }
+            else
+            {
+              secondRow = num;
+            }
+          }
+          else
+          {
+            if (eCount % 2 == 0)
+            {
+              firstRow = String(num1) + String(op) + String(num);
+            }
+            else
+            {
+              secondRow = String(num1) + String(op) + String(num);
+            }
+          }
+
+          isDegree = false;
+        }
+
+        if (eCount % 2 == 0)
+        {
+          clearLcd();
+          lcd.setCursor(0, 1);
+          lcd.print(secondRow);
+          lcd.setCursor(0, 0);
+          lcd.print(firstRow);         
+        }
+        else
+        {
+          clearLcd();
+          lcd.print(firstRow);
+          lcd.setCursor(0, 1);
+          lcd.print(secondRow);
+        }
+      }
+
+      // when 0 is pressed
+      if (mainKey == '0')
+      {
+
+        if (isDecimal == true)
+        {
+          if (num == 0)
+          {
+            num = 0.0;
+          }
+          else 
+          {
+            num = (num * dCount + 0) / dCount;
+            
+          }
+          dCount *= 10;
+        }
+        else
+        {
+          if (num == 0) 
+          {
+            num = 0;
+          }
+          else 
+          {
+            num = (num * 10) + 0;
+          }
         }
       }
 
@@ -552,9 +686,293 @@ void mathematic(void)
         }
       }
 
+      // when negative (-) was presse
+      if (mainKey == 'm')
+      {
+        negative = true;
+        lcd.print("-");
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "-";
+        }
+        else
+        {
+          secondRow = secondRow + "-";
+        }
+      }
+
+      // when square was pressed
+      if (mainKey == '^')
+      {
+        sqrNum = num;
+        num = 0;
+        square = true;
+      }
+
+      // when sinus was pressed
+      if (mainKey == 's')
+      {
+        lcd.print("sin");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }                
+
+        function = true;
+        functionType = 's';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "sin";
+        }
+        else
+        {
+          secondRow = secondRow + "sin";
+        }
+      }
+
+      // when arcus sinus was pressed
+      if (mainKey == 'S')
+      {
+        lcd.print("aSin");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'S';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aSin";
+        }
+        else
+        {
+          secondRow = secondRow + "aSin";
+        }
+      }
+
+      // when cosinus was pressed
+      if (mainKey == 'c')
+      {
+        lcd.print("cos");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'c';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "cos";
+        }
+        else
+        {
+          secondRow = secondRow + "cos";
+        }
+      }
+
+      // when arcus cosinus was pressed
+      if (mainKey == 'C')
+      {
+        lcd.print("aCos");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+        
+        function = true;
+        functionType = 'C';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aCos";
+        }
+        else
+        {
+          secondRow = secondRow + "aCos";
+        }
+      }
+
+      // when tangens was pressed
+      if (mainKey == 't')
+      {
+        lcd.print("tan");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 't';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "tan";
+        }
+        else
+        {
+          secondRow = secondRow + "tan";
+        }
+      }
+
+      // when arcus tangens was pressed
+      if (mainKey == 'T')
+      {
+        lcd.print("aTan");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'T';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aTan";
+        }
+        else
+        {
+          secondRow = secondRow + "aTan";
+        }
+      }
+
+      // when cotangens was pressed
+      if (mainKey == 'n')
+      {
+        lcd.print("ctn");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'n';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "ctn";
+        }
+        else
+        {
+          secondRow = secondRow + "ctn";
+        }
+      }
+
+      // when arcus cotanges was pressed
+      if (mainKey == 'N')
+      {
+        lcd.print("aCtn");
+
+        if (num != 0)
+        {
+          multipleF = num;
+          num = 0;
+        }
+
+        function = true;
+        functionType = 'N';
+
+        if (eCount % 2 == 0)
+        {
+          firstRow = firstRow + "aCtn";
+        }
+        else
+        {
+          secondRow = secondRow + "aCtn";
+        }
+      }
+
       // when = was pressed
       if (mainKey == '=')
       {
+        //initalize num as negative if selected
+        if (negative == true)
+        {
+          num = num * -1;
+          negative = false;
+        }
+
+        // if square is used
+        if (square == true)
+        {
+          num = pow(sqrNum, num);
+          square = false;
+          op = 'n';
+        }
+
+        // if square root is used
+        if (squareRoot == true)
+        {
+          num = pow(num, 1 / sqrRootNum);
+          squareRoot = false;
+          op = 'n';
+        }
+
+        // if goniometric function is used
+        if (function == true)
+        {
+          if (functionType == 's')
+          {
+            num = sin(radians(num));    
+            num *= multipleF;
+          }
+          else if (functionType == 'S')
+          {
+            num = asin(num);
+            num = num * 180 / M_PI; // convert to degrees
+          }
+          else if (functionType == 'c')
+          {
+            num = cos(radians(num));
+          }
+          else if (functionType == 'C')
+          {
+            num = acos(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 't')
+          {
+            num = tan(radians(num));           
+          }
+          else if (functionType == 'T')
+          {
+            num = atan(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 'n')
+          {
+            num = cos(radians(num)) / sin (radians(num));
+          }
+          else if (functionType == 'N')
+          {
+            num = atan(1 / num);
+            num = num * 180 / M_PI;
+          }
+          
+          multipleF = 1;
+          functionType = false;
+        }
+
         // choose operation
         if (op == '+')
         {          
@@ -575,6 +993,29 @@ void mathematic(void)
         {          
           num2 = num;
           num = num1 * num2;
+        }
+
+        if (op == '+' && num1 == 1 && num2 == 1)
+        {
+          clearLcd();
+          lcd.print("We are checking.");
+          delay(3000);
+          clearLcd();
+          lcd.print("Touch some grass");
+          lcd.setCursor(0, 1);
+          lcd.print(";.,;;:,:;,:.;,.;");
+          delay(3000);
+          clearLcd();
+
+          if (eCount % 2 == 0)
+          {
+            lcd.print(firstRow);
+          }
+          else
+          {
+            lcd.setCursor(0, 1);
+            lcd.print(secondRow);
+          }
         }
 
         // delete unnecessary zeros 1.00 - store the new number
@@ -621,6 +1062,100 @@ void mathematic(void)
         eCount++;
         isDecimal = false;
         dCount = 10;
+        isSecond = false;
+        isDegree = false;
+      }
+
+      // when some op is pressed
+      if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
+      {
+        Serial.print("num: ");
+        Serial.println(num);
+
+        //initalize num as negative if selected
+        if (negative == true)
+        {
+          num = num * -1;
+          negative = false;
+        }
+
+        // if square is used
+        if (square == true)
+        {
+          num = pow(sqrNum, num);
+          square = false;
+        }
+
+        // if square root is used
+        if (squareRoot == true)
+        {
+          num = pow(num, 1 / sqrRootNum);
+          squareRoot = false;
+        }
+
+        // if goniometric function is used
+        if (function == true)
+        {
+          if (functionType == 's')
+          {
+            num = sin(radians(num));    
+            num *= multipleF;
+          }
+          else if (functionType == 'S')
+          {
+            num = asin(num);
+            num = num * 180 / M_PI; // convert to degrees
+          }
+          else if (functionType == 'c')
+          {
+            num = cos(radians(num));
+          }
+          else if (functionType == 'C')
+          {
+            num = acos(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 't')
+          {
+            num = tan(radians(num));
+          }
+          else if (functionType == 'T')
+          {
+            num = atan(num);
+            num = num * 180 / M_PI;
+          }
+          else if (functionType == 'n')
+          {
+            num = cos(radians(num)) / sin (radians(num));
+          }
+          else if (functionType == 'N')
+          {
+            num = atan(1 / num);
+            num = num * 180 / M_PI;
+          }
+          
+          multipleF = 1;
+          functionType = false;
+        }
+
+        op = mainKey;
+        num1 = num;
+        num = 0;
+        isDecimal = false;
+        dCount = 10;
+        isSecond = true;
+        isDegree = false;
+      }
+
+      if (mainKey == '.')
+      {
+        isDecimal = true;
+      }
+
+      // automatically change keypad to default after using optional key
+      if (keyboardType == 1)
+      {
+        keyboardType = 0;
       }
 
       // when # was pressed
@@ -628,7 +1163,7 @@ void mathematic(void)
       {
         // print menu
         clearLcd();
-        lcd.print("Choose mod 0-1");
+        lcd.print("Choose mod 1-2");
         lcd.setCursor(0, 1);
         lcd.print("A -> DEL, B -> C");
 
@@ -639,18 +1174,14 @@ void mathematic(void)
 
           if (mainKey)
           {
-            if (mainKey == '0')
+            if (mainKey == '1')
             {
               keyboardType = 0; // main
             }
-            else if (mainKey == '1')
+            else if (mainKey == '2')
             {
               keyboardType = 1; // aditionMath
 
-            }
-            else if (mainKey == '2')
-            {
-              keyboardType = 2; // goniometricKeys
             }
             else if (mainKey == '+')
             {
@@ -659,6 +1190,15 @@ void mathematic(void)
             else if (mainKey == '-')
             {
               // completely clear all values and lcd
+              num = 0;
+              num1 = 0;
+              num2 = 0;
+              op = 'n';
+              eCount = 0;
+              firstRow = "";
+              secondRow = "";
+              isDegree = false;
+              isSecond = false;
             }
             else
             {
@@ -688,23 +1228,6 @@ void mathematic(void)
           }
         }
         delay(300);
-      }
-
-      // when some op is pressed
-      if (mainKey == '+' || mainKey == '-' || mainKey == '/' || mainKey == '*')
-      {
-        Serial.print("num: ");
-        Serial.println(num);
-        op = mainKey;
-        num1 = num;
-        num = 0;
-        isDecimal = false;
-        dCount = 10;
-      }
-
-      if (mainKey == '.')
-      {
-        isDecimal = true;
       }
     }
   }
@@ -757,7 +1280,6 @@ void play(void)
 // decimal point editor function
 bool decimal(float num)
 {
-  // declare variables
   int x = num;
   float check = num - x;
 
@@ -770,20 +1292,6 @@ bool decimal(float num)
   {
     return true;
   }
-}
-
-// length of number function float/integer
-int lengthNum(int numberInt)
-{
-  int length = 0;
-
-  while (numberInt > 0)
-  {
-    numberInt /= 10;
-    length++;
-  }
-
-  return length;
 }
 
 // clear lcd function
