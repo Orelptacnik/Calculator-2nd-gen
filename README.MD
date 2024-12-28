@@ -8,3 +8,5 @@ created: 14. 5. 2024
 finished: in progress
 *
 github: Orelptacnik
+*
+Edit: This is so dumb
